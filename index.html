@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galaxy AI - Universal Yordamchi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #090a0f;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .chat-card {
+            width: 90%;
+            max-width: 600px;
+            height: 85vh;
+            background: #121526;
+            border-radius: 16px;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #1e2442;
+        }
+        .header {
+            background: #1a1e36;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #282e54;
+        }
+        .header h1 { color: #00d2ff; font-size: 1.4rem; }
+        .header p { color: #8a94a6; font-size: 0.8rem; margin-top: 4px; }
+        .chat-box {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .msg {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+        }
+        .user {
+            align-self: flex-end;
+            background: #00d2ff;
+            color: #000;
+            font-weight: 500;
+        }
+        .ai {
+            align-self: flex-start;
+            background: #1c223d;
+            border: 1px solid #2c355e;
+            color: #e1e6f0;
+        }
+        .ai img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-top: 8px;
+        }
+        .input-area {
+            display: flex;
+            padding: 12px;
+            background: #1a1e36;
+            gap: 8px;
+        }
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #2c355e;
+            border-radius: 8px;
+            background: #0d0f1a;
+            color: #fff;
+            outline: none;
+        }
+        button {
+            padding: 10px 16px;
+            border: none;
+            background: #00d2ff;
+            color: #000;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="chat-card">
+    <div class="header">
+        <h1>🌌 Galaxy AI (Smart & Math)</h1>
+        <p>Matematika, fanlar, savollar yoki rasm chizish: "rasm: ..."</p>
+    </div>
+    <div class="chat-box" id="chatBox">
+        <div class="msg ai">Salom! Men Galaxy AI yordamchisiman. Matematik tenglamalar, fizika, kimyo va boshqa fanlardan savollaringiz bo'lsa bering!</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Masalan: 2x + 5 = 15 ni yechib ber..." onkeydown="if(event.key==='Enter') sendMessage()">
+        <button onclick="sendMessage()">Yuborish</button>
+    </div>
+</div>
+
+<script>
+async function sendMessage() {
+    const input = document.getElementById("userInput");
+    const chatBox = document.getElementById("chatBox");
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    chatBox.innerHTML += `<div class="msg user">${text}</div>`;
+    input.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadingId = "load-" + Date.now();
+    chatBox.innerHTML += `<div class="msg ai" id="${loadingId}"><i>Galaxy AI o'ylamoqda va tahlil qilmoqda...</i></div>`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    const loadingElem = document.getElementById(loadingId);
+
+    // Rasm chizish so'rovi
+    if (text.toLowerCase().startsWith("rasm:") || text.toLowerCase().startsWith("chiz:")) {
+        const prompt = text.replace(/^(rasm:|chiz:)/i, "").trim();
+        const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=512&height=512&nologo=true`;
+        loadingElem.innerHTML = `Mana siz so'ragan rasm:<br><img src="${imageUrl}" alt="AI Rasm" onload="scrollToBottom()">`;
+    } else {
+        // Matematika va fanlar uchun sun'iy intellektga ko'rsatma berish
+        const systemInstruction = "Siz Galaxy AI nomli aqlli va aniq yordamchisiz. Matematika va boshqa fanlarga oid savollarga ketma-ketlikda, tushunarli va batafsil yechim ko'rsatib javob bering.";
+        const fullPrompt = `${systemInstruction}\nFoydalanuvchi savoli: ${text}`;
+
+        try {
+            const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(fullPrompt)}`);
+            const answer = await res.text();
+            loadingElem.innerText = answer;
+        } catch (err) {
+            loadingElem.innerText = "Xatolik yuz berdi. Qayta urinib ko'ring.";
+        }
+    }
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+
+function scrollToBottom() {
+    const chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
+</body>
+</html>
